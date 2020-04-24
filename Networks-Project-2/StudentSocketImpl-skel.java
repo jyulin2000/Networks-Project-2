@@ -48,7 +48,8 @@ class StudentSocketImpl extends BaseSocketImpl {
     this.address = address; // MIGHT WANT TO REMOVE THIS LINE BECAUSE OF STUFF
     windowSize = 6; // Arbitrary idk what to do with this yet
     
-    sendSYNPacket();
+    TCPWrapper.send(new TCPPacket(localport, port, 0, 0, 
+			false, true, false, windowSize, null), address);
     
     stateChange(State.SYN_SENT);
   }
@@ -161,6 +162,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  currentState = state;
   }
   
+  /*
   private void sendSYNPacket() {
 	  TCPWrapper.send(new TCPPacket(localport, port, 0, 0, 
 				false, true, false, windowSize, null), address);
@@ -170,6 +172,8 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  TCPWrapper.send(new TCPPacket(localport, port, 0, 0, 
 				true, true, false, windowSize, null), address);
   }
+  */
+  
   /**
    * handle timer expiration (called by TCPTimerTask)
    * @param ref Generic reference that can be used by the timer to return 
