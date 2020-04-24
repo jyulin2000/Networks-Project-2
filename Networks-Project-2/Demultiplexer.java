@@ -164,7 +164,7 @@ class Demultiplexer extends Thread {
                 c.receivePacket(packet);
             }
             else
-            	System.out.println("Listening socket not found.")
+            	System.out.println("Listening socket not found.");
             	System.err.println("!!! UNMATCHED PACKET");
         }
 	else
