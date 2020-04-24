@@ -14,16 +14,16 @@ class StudentSocketImpl extends BaseSocketImpl {
   private int windowSize;
   
   private enum State {
-	  Closed,
-	  Listen,
+	  CLOSED,
+	  LISTEN,
 	  SYN_SENT,
 	  SYN_RCVD,
-	  Established,
+	  ESTABLISHED,
 	  FIN_WAIT_1,
 	  FIN_WAIT_2,
 	  CLOSE_WAIT,
 	  LAST_ACK,
-	  Closing,
+	  CLOSING,
 	  TIME_WAIT
   }
   
@@ -31,7 +31,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 
   StudentSocketImpl(Demultiplexer D) {  // default constructor
     this.D = D;
-    currentState = State.Closed;
+    currentState = State.CLOSED;
   }
 
   /**
@@ -47,8 +47,8 @@ class StudentSocketImpl extends BaseSocketImpl {
     D.registerConnection(address, localport, port, this);
     this.address = address; // MIGHT WANT TO REMOVE THIS LINE BECAUSE OF STUFF
     windowSize = 6; // Arbitrary idk what to do with this yet
-    TCPWrapper.send(new TCPPacket(localport, port, 0, 0, 
-    				false, true, false, windowSize, null), address);
+    
+    sendSYNPacket();
     
     stateChange(State.SYN_SENT);
   }
@@ -58,6 +58,35 @@ class StudentSocketImpl extends BaseSocketImpl {
    * @param p The packet that arrived
    */
   public synchronized void receivePacket(TCPPacket p){
+	  this.notifyAll();
+	  
+	  switch (currentState) {
+	  	case LISTEN:
+	  		if (p.synFlag) {
+				try {
+					D.unregisterListeningSocket(localport, this);
+				} catch (IOException e) {
+					System.out.println(e);
+					e.printStackTrace();
+				}
+				try {
+					D.registerConnection(p.sourceAddr, localport, p.sourcePort, this);
+				} catch (IOException e) {
+					System.out.println(e);
+					e.printStackTrace();
+				}
+				
+				TCPWrapper.send(new TCPPacket(localport, port, 0, 0, 
+						true, true, false, windowSize, null), address);
+				
+				stateChange(State.SYN_RCVD);
+	  		}
+	  	
+	  	case SYN_SENT:
+	  		if (p.synFlag && p.ackFlag) {
+	  			stateChange(State.ESTABLISHED);
+	  		}
+	  }
 	  System.out.println(p.toString());
   }
   
@@ -71,7 +100,7 @@ class StudentSocketImpl extends BaseSocketImpl {
   public synchronized void acceptConnection() throws IOException {
 	  D.registerListeningSocket(localport, this);
 
-	  stateChange(State.Listen);
+	  stateChange(State.LISTEN);
   }
 
   
@@ -127,10 +156,19 @@ class StudentSocketImpl extends BaseSocketImpl {
   }
   
   private void stateChange(State state) {
+	  System.out.println("!!! " + currentState + "->" + state);
 	  currentState = state;
-	  System.out.println("State changed to " + state.toString() + ".");
   }
-
+  
+  private void sendSYNPacket() {
+	  TCPWrapper.send(new TCPPacket(localport, port, 0, 0, 
+				false, true, false, windowSize, null), address);
+  }
+  
+  private void sendSYNACKPacket() {
+	  TCPWrapper.send(new TCPPacket(localport, port, 0, 0, 
+				true, true, false, windowSize, null), address);
+  }
   /**
    * handle timer expiration (called by TCPTimerTask)
    * @param ref Generic reference that can be used by the timer to return 
