@@ -62,6 +62,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  
 	  switch (currentState) {
 	  	case LISTEN:
+	  		System.out.println("Received packet in state LISTEN.");
 	  		if (p.synFlag) {
 				try {
 					D.unregisterListeningSocket(localport, this);
