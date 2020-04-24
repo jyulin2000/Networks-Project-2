@@ -79,7 +79,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 				}
 				
 				TCPWrapper.send(new TCPPacket(localport, port, 0, 0, 
-						true, true, false, windowSize, null), address);
+						true, true, false, windowSize, null), p.sourceAddr);
 				
 				stateChange(State.SYN_RCVD);
 	  		}
