@@ -18,7 +18,7 @@ class StudentSocketImpl extends BaseSocketImpl {
   
   // Timeout length for unACKed packets
   // milliseconds
-  private static final int timerDelay = 1000; 
+  private static final int timerDelay = 2500; 
   
   private enum State {
 	  CLOSED,
@@ -60,7 +60,7 @@ class StudentSocketImpl extends BaseSocketImpl {
     ackNumber = 70;
     seqNumberPlusOne = 30;
     
-    sendPacket(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber, 
+    sendPacketWithTimer(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber, 
 			false, true, false, windowSize, null));
     
     
@@ -98,14 +98,12 @@ class StudentSocketImpl extends BaseSocketImpl {
 				
 				stateChange(State.SYN_RCVD);
 				
-				sendPacket(new TCPPacket(localport, port, seqNumber, ackNumber, 
+				sendPacketWithTimer(new TCPPacket(localport, port, seqNumber, ackNumber, 
 						true, true, false, windowSize, null));
 	  		}
 	  		break;
 	  		
 	  	case SYN_SENT:
-	  		System.out.println("SYN_SENT Case Block");
-	  		System.out.println("This socket current seqnumber: " + seqNumber + ", received packet acknumber: " + p.ackNum);
 	  		if (p.synFlag && p.ackFlag) {
 	  			stateChange(State.ESTABLISHED);
 	  			updateSeqNumber(p.seqNum);
@@ -226,7 +224,19 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  seqNumber = n;
 	  seqNumberPlusOne = n+1;
   }
+  
   private void sendPacket(TCPPacket packet) {
+	  // If we force a resend before timer expires, need to reset timer.
+	  if (!(tcpTimer == null)) {
+		  tcpTimer.cancel();
+		  tcpTimer = null;
+	  }
+	  
+	  System.out.println("Sending packet with seqnumber " + packet.seqNum + ".");
+	  
+	  TCPWrapper.send(packet, this.address);
+  }
+  private void sendPacketWithTimer(TCPPacket packet) {
 	  // If we force a resend before timer expires, need to reset timer.
 	  if (!(tcpTimer == null)) {
 		  tcpTimer.cancel();
