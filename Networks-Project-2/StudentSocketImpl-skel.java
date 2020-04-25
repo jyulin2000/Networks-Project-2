@@ -98,7 +98,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 				
 				stateChange(State.SYN_RCVD);
 				
-				sendPacketWithTimer(new TCPPacket(localport, port, seqNumber, ackNumber, 
+				sendPacketWithTimer(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber, 
 						true, true, false, windowSize, null));
 	  		}
 	  		break;
@@ -110,7 +110,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  			this.address = p.sourceAddr;
 	  			this.port = p.sourcePort;
 	  			
-	  			sendPacket(new TCPPacket(localport, port, seqNumber, ackNumber, 
+	  			sendPacket(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber, 
 	  					true, false, false, windowSize, null));
 	  		}
 	  		break;
@@ -121,7 +121,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  			this.port = p.sourcePort;
 	  		} else if (p.synFlag) {
 	  			// Prematurely resend SYNACK packet
-	  			handleTimer(new TCPPacket(localport, port, seqNumber, ackNumber, 
+	  			handleTimer(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber, 
 						true, true, false, windowSize, null));
 	  		}
 	  		break;
@@ -134,11 +134,11 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  			
 	  			stateChange(State.CLOSE_WAIT);
 	  			
-	  			sendPacket(new TCPPacket(localport, port, seqNumber, ackNumber, 
+	  			sendPacket(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber, 
 	  					true, false, false, windowSize, null));
 	  		} else if (p.ackFlag && p.synFlag) {
 	  			// Prematurely resend ACK packet
-	  			handleTimer(new TCPPacket(localport, port, seqNumber, ackNumber,
+	  			sendPacket(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber,
 	  					true, true, false, windowSize, null));
 	  		}
 	  		break;
