@@ -361,8 +361,13 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  
 	  if (packet == null) return;
 	  
+	  try {
+		  createTimerTask(timerDelay, packet);
+	  } catch (Exception e) {
+	  }
+	  
 	  System.out.println("Sending packet with seqnumber " + packet.seqNum + " and starting timer...");
-	  createTimerTask(timerDelay, packet);
+	  
 	  
 	  TCPWrapper.send(packet, this.address);
   }
@@ -405,21 +410,15 @@ class StudentSocketImpl extends BaseSocketImpl {
     	if (currentState == State.TIME_WAIT) {
     		System.out.println("30 second timer complete. Returning to CLOSED state.");
     		try {
-    			System.out.println("111");
 	    		stateChange(State.CLOSED);
-	    		System.out.println("222");
 	    		notifyAll();
-	    		System.out.println("333");
     		} catch (Exception e) {
     		}
-    		System.out.println("444");
     		this.notifyAll();
-    		System.out.println("555");
     		try {
     			D.unregisterConnection(address, localport, port, this);
     		} catch (Exception e) {
     		}
-    		System.out.println("666");
     	}
     }
   }
