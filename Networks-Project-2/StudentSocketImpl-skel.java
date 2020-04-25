@@ -53,7 +53,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 	this.address = address;
 	this.port = port;
     D.registerConnection(address, localport, port, this);    
-
+    
     sendPacket(new TCPPacket(localport, port, seqNumber, -1, 
 			false, true, false, windowSize, null));
     
@@ -92,6 +92,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 					e.printStackTrace();
 				}
 				
+				this.address = p.sourceAddr;
 				ackNumber = p.seqNum;
 				seqNumber++;
 				sendPacket(new TCPPacket(localport, p.sourcePort, seqNumber, ackNumber, 
@@ -180,12 +181,12 @@ class StudentSocketImpl extends BaseSocketImpl {
   
   private void sendPacket(TCPPacket packet) {
 	  // If we force a resend before timer expires, need to reset timer.
+	  /*
 	  if (!(tcpTimer == null)) {
 		  tcpTimer.cancel();
 		  tcpTimer = null;
 	  }
-	  
-	  tcpTimer = new Timer(true);
+	  */
 	  
 	  System.out.println("Sending packet with seqnumber " + packet.seqNum + " and starting timer...");
 	  TCPTimerTask timerTask = createTimerTask(timerDelay, packet);
@@ -209,6 +210,7 @@ class StudentSocketImpl extends BaseSocketImpl {
     	sendPacket(p);
     }
     else {
+    	System.out.println("why are you here i don't know");
     	if (currentState == State.TIME_WAIT) {
     		System.out.println("30 second timer complete. Returning to CLOSED state.");
     		stateChange(State.CLOSED);
