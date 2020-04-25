@@ -362,14 +362,13 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  if (packet == null) return;
 	  
 	  try {
+		  TCPWrapper.send(packet, this.address);
 		  createTimerTask(timerDelay, packet);
 	  } catch (Exception e) {
+		  return;
 	  }
 	  
 	  System.out.println("Sending packet with seqnumber " + packet.seqNum + " and starting timer...");
-	  
-	  
-	  TCPWrapper.send(packet, this.address);
   }
   
   private class CloseThread implements Runnable {
