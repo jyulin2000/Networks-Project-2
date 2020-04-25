@@ -292,12 +292,12 @@ class StudentSocketImpl extends BaseSocketImpl {
 		  stateChange(State.LAST_ACK);
 	  } else if (currentState == State.ESTABLISHED) {
 		  stateChange(State.FIN_WAIT_1);
+	  } else {
+		  return;
 	  }
 	  
-	  System.out.println("<<< SENDING FIN PACKET >>>");
 	  sendPacketWithTimer(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber,
 			  false, false, true, windowSize, null));
-	  System.out.println("<<< FIN PACKET SENT >>>");
 	  
 	  try {
 		  CloseThread closer = new CloseThread(this);

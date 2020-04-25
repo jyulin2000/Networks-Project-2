@@ -166,7 +166,6 @@ class TCPWrapper {
             sock.send(p);
         }
         catch(Exception e) {
-        	System.out.println("YOU ARE HERE");
         	System.out.println(packet);
             System.out.println(e);
             System.exit(1);
