@@ -359,6 +359,8 @@ class StudentSocketImpl extends BaseSocketImpl {
 		  tcpTimer = null;
 	  }
 	  
+	  if (packet == null) return;
+	  
 	  System.out.println("Sending packet with seqnumber " + packet.seqNum + " and starting timer...");
 	  createTimerTask(timerDelay, packet);
 	  
