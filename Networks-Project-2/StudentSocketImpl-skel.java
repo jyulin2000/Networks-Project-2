@@ -58,7 +58,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 			false, true, false, windowSize, null));
     
     stateChange(State.SYN_SENT);
-    
+    /*
     while (!(currentState == State.ESTABLISHED)) {
     	System.out.println("Waiting to establish connection...");
     	try {
@@ -66,6 +66,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 		} catch (InterruptedException e) {
 		}
     }
+    */
   }
   
   /**
