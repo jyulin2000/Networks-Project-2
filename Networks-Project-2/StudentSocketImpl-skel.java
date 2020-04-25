@@ -208,6 +208,8 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  	case TIME_WAIT:
 	  		if (p.finFlag) {
 	  			resendACKPacket();
+	  		} else if (p.ackFlag) {
+	  			resendACKPacket();
 	  		}
 	  		break;
 	  	
