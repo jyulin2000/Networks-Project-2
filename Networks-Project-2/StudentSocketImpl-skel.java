@@ -12,8 +12,9 @@ class StudentSocketImpl extends BaseSocketImpl {
   private Demultiplexer D;
   private Timer tcpTimer;
   private int ackNumber;
-  private int seqNumber = 0;
-  private int windowSize = 5;
+  private int seqNumber;
+  private int seqNumberPlusOne;
+  private int windowSize = 5; // arbitrary
   
   // Timeout length for unACKed packets
   // milliseconds
@@ -56,7 +57,10 @@ class StudentSocketImpl extends BaseSocketImpl {
     
     stateChange(State.SYN_SENT);
     
-    sendPacket(new TCPPacket(localport, port, seqNumber, -1, 
+    ackNumber = 70;
+    seqNumberPlusOne = 30;
+    
+    sendPacket(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber, 
 			false, true, false, windowSize, null));
     
     
@@ -77,29 +81,23 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  
 	  switch (currentState) {
 	  	case LISTEN:
-	  		System.out.println("Received packet in state LISTEN.");
 	  		if (p.synFlag) {
 				try {
 					D.unregisterListeningSocket(localport, this);
-				} catch (IOException e) {
-					System.out.println(e);
-					e.printStackTrace();
-				}
-				try {
 					D.registerConnection(p.sourceAddr, localport, p.sourcePort, this);
 				} catch (IOException e) {
 					System.out.println(e);
 					e.printStackTrace();
 				}
 				
+				updateSeqNumber(p.seqNum);
+				ackNumber = p.ackNum;
 				this.address = p.sourceAddr;
 				this.localport = p.destPort;
 				this.port = p.sourcePort;
 				
 				stateChange(State.SYN_RCVD);
 				
-				ackNumber = p.seqNum;
-				seqNumber++;
 				sendPacket(new TCPPacket(localport, port, seqNumber, ackNumber, 
 						true, true, false, windowSize, null));
 	  		}
@@ -108,8 +106,42 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  	case SYN_SENT:
 	  		System.out.println("SYN_SENT Case Block");
 	  		System.out.println("This socket current seqnumber: " + seqNumber + ", received packet acknumber: " + p.ackNum);
-	  		if (p.synFlag && p.ackFlag && p.ackNum == seqNumber) {
+	  		if (p.synFlag && p.ackFlag) {
 	  			stateChange(State.ESTABLISHED);
+	  			updateSeqNumber(p.seqNum);
+	  			this.address = p.sourceAddr;
+	  			this.port = p.sourcePort;
+	  			
+	  			sendPacket(new TCPPacket(localport, port, seqNumber, ackNumber, 
+	  					true, false, false, windowSize, null));
+	  		}
+	  		break;
+	  	
+	  	case SYN_RCVD:
+	  		if (p.ackFlag) {
+	  			stateChange(State.ESTABLISHED);
+	  			this.port = p.sourcePort;
+	  		} else if (p.synFlag) {
+	  			// Prematurely resend SYNACK packet
+	  			handleTimer(new TCPPacket(localport, port, seqNumber, ackNumber, 
+						true, true, false, windowSize, null));
+	  		}
+	  		break;
+	  	
+	  	case ESTABLISHED:
+	  		if (p.finFlag) {
+	  			updateSeqNumber(p.seqNum);
+	  			this.address = p.sourceAddr;
+	  			this.localport = p.sourcePort;
+	  			
+	  			stateChange(State.CLOSE_WAIT);
+	  			
+	  			sendPacket(new TCPPacket(localport, port, seqNumber, ackNumber, 
+	  					true, false, false, windowSize, null));
+	  		} else if (p.ackFlag && p.synFlag) {
+	  			// Prematurely resend ACK packet
+	  			handleTimer(new TCPPacket(localport, port, seqNumber, ackNumber,
+	  					true, true, false, windowSize, null));
 	  		}
 	  		break;
 	  }
@@ -190,6 +222,10 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  }
   }
   
+  private void updateSeqNumber(int n) {
+	  seqNumber = n;
+	  seqNumberPlusOne = n+1;
+  }
   private void sendPacket(TCPPacket packet) {
 	  // If we force a resend before timer expires, need to reset timer.
 	  if (!(tcpTimer == null)) {
@@ -215,7 +251,7 @@ class StudentSocketImpl extends BaseSocketImpl {
     
     if (ref != null) {
     	TCPPacket p = (TCPPacket) ref;
-    	System.out.println("Timer ran out on packet with seqnumber " + p.seqNum + ". Resending.");
+    	System.out.println("Resending packet with seqnumber " + p.seqNum + "...");
     	sendPacket(p);
     }
     else {
