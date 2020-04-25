@@ -294,8 +294,10 @@ class StudentSocketImpl extends BaseSocketImpl {
 		  stateChange(State.FIN_WAIT_1);
 	  }
 	  
+	  System.out.println("<<< SENDING FIN PACKET >>>");
 	  sendPacketWithTimer(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber,
 			  false, false, true, windowSize, null));
+	  System.out.println("<<< FIN PACKET SENT >>>");
 	  
 	  try {
 		  CloseThread closer = new CloseThread(this);
@@ -401,7 +403,6 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  }
     
     if (ref != null) {
-    	System.out.println("hellohellohello");
     	TCPPacket p = (TCPPacket) ref;
     	System.out.println("Resending packet with seqnumber " + p.seqNum + "...");
     	sendPacketWithTimer(p);
