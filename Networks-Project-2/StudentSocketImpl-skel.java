@@ -54,10 +54,10 @@ class StudentSocketImpl extends BaseSocketImpl {
 	this.port = port;
     D.registerConnection(address, localport, port, this);    
     
+    stateChange(State.SYN_SENT);
+    
     sendPacket(new TCPPacket(localport, port, seqNumber, -1, 
 			false, true, false, windowSize, null));
-    
-    stateChange(State.SYN_SENT);
     
     while (!(currentState == State.ESTABLISHED)) {
     	System.out.println("Waiting to establish connection...");
@@ -96,12 +96,12 @@ class StudentSocketImpl extends BaseSocketImpl {
 				this.localport = p.destPort;
 				this.port = p.sourcePort;
 				
+				stateChange(State.SYN_RCVD);
+				
 				ackNumber = p.seqNum;
 				seqNumber++;
 				sendPacket(new TCPPacket(localport, port, seqNumber, ackNumber, 
 						true, true, false, windowSize, null));
-				
-				stateChange(State.SYN_RCVD);
 	  		}
 	  		break;
 	  		
@@ -125,7 +125,7 @@ class StudentSocketImpl extends BaseSocketImpl {
    */
   public synchronized void acceptConnection() throws IOException {
 	  D.registerListeningSocket(localport, this);
-
+	  
 	  stateChange(State.LISTEN);
   }
 
