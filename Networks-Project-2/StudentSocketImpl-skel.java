@@ -150,9 +150,11 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  	case FIN_WAIT_1:
 	  		if (p.finFlag) {
 	  			updateSeqNumber(p.seqNum);
+	  			/*
 	  			address = p.sourceAddr;
 	  			ackNumber = p.ackNum;
 	  			port = p.sourcePort;
+	  			*/
 	  			
 	  			stateChange(State.CLOSING);
 	  			sendPacketWithTimer(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber, 
@@ -170,10 +172,11 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  	case FIN_WAIT_2:
 	  		if (p.finFlag) {
 	  			updateSeqNumber(p.seqNum);
+	  			/*
 	  			address = p.sourceAddr;
 	  			ackNumber = p.ackNum;
 	  			port = p.sourcePort;
-	  			
+	  			*/
 	  			sendPacket(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber,
 	  					true, false, false, windowSize, null));
 	  			
