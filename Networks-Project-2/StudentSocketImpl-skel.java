@@ -59,6 +59,7 @@ class StudentSocketImpl extends BaseSocketImpl {
     sendPacket(new TCPPacket(localport, port, seqNumber, -1, 
 			false, true, false, windowSize, null));
     
+    /*
     while (!(currentState == State.ESTABLISHED)) {
     	System.out.println("Waiting to establish connection...");
     	try {
@@ -66,6 +67,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 		} catch (InterruptedException e) {
 		}
     }
+    */
   }
   
   /**
