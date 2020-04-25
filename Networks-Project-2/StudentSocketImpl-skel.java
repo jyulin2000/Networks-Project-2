@@ -262,7 +262,7 @@ class StudentSocketImpl extends BaseSocketImpl {
     if (ref != null) {
     	TCPPacket p = (TCPPacket) ref;
     	System.out.println("Resending packet with seqnumber " + p.seqNum + "...");
-    	sendPacket(p);
+    	sendPacketWithTimer(p);
     }
     else {
     	System.out.println("why are you here i don't know");
