@@ -362,11 +362,8 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  if (packet == null) return;
 	  
 	  try {
-		  System.out.println("111");
 		  TCPWrapper.send(packet, this.address);
-		  System.out.println("222");
 		  createTimerTask(timerDelay, packet);
-		  System.out.println("333");
 	  } catch (Exception e) {
 		  return;
 	  }
@@ -404,6 +401,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  }
     
     if (ref != null) {
+    	System.out.println("hellohellohello")
     	TCPPacket p = (TCPPacket) ref;
     	System.out.println("Resending packet with seqnumber " + p.seqNum + "...");
     	sendPacketWithTimer(p);
