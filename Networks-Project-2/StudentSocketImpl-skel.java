@@ -11,7 +11,13 @@ class StudentSocketImpl extends BaseSocketImpl {
 
   private Demultiplexer D;
   private Timer tcpTimer;
-  private int windowSize;
+  private int ackNumber;
+  private int seqNumber = 0;
+  private int windowSize = 5;
+  
+  // Timeout length for unACKed packets
+  // milliseconds
+  private static final int timerDelay = 1000; 
   
   private enum State {
 	  CLOSED,
@@ -44,14 +50,22 @@ class StudentSocketImpl extends BaseSocketImpl {
    */
   public synchronized void connect(InetAddress address, int port) throws IOException {	
 	localport = D.getNextAvailablePort();
-    D.registerConnection(address, localport, port, this);
-    this.address = address; // MIGHT WANT TO REMOVE THIS LINE BECAUSE OF STUFF
-    windowSize = 6; // Arbitrary idk what to do with this yet
-    
-    TCPWrapper.send(new TCPPacket(localport, port, 0, 0, 
-			false, true, false, windowSize, null), address);
+	this.address = address;
+	this.port = port;
+    D.registerConnection(address, localport, port, this);    
+
+    sendPacket(new TCPPacket(localport, port, seqNumber, -1, 
+			false, true, false, windowSize, null));
     
     stateChange(State.SYN_SENT);
+    
+    while (!(currentState == State.ESTABLISHED)) {
+    	System.out.println("Waiting to establish connection...");
+    	try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+		}
+    }
   }
   
   /**
@@ -78,14 +92,16 @@ class StudentSocketImpl extends BaseSocketImpl {
 					e.printStackTrace();
 				}
 				
-				TCPWrapper.send(new TCPPacket(localport, p.sourcePort, 0, 0, 
-						true, true, false, windowSize, null), p.sourceAddr);
+				ackNumber = p.seqNum;
+				seqNumber++;
+				sendPacket(new TCPPacket(localport, p.sourcePort, seqNumber, ackNumber, 
+						true, true, false, windowSize, null));
 				
 				stateChange(State.SYN_RCVD);
 	  		}
 	  	
 	  	case SYN_SENT:
-	  		if (p.synFlag && p.ackFlag) {
+	  		if (p.synFlag && p.ackFlag && p.ackNum == seqNumber) {
 	  			stateChange(State.ESTABLISHED);
 	  		}
 	  }
@@ -153,7 +169,7 @@ class StudentSocketImpl extends BaseSocketImpl {
    */
   private TCPTimerTask createTimerTask(long delay, Object ref){
     if(tcpTimer == null)
-      tcpTimer = new Timer(false);
+    	tcpTimer = new Timer(false);
     return new TCPTimerTask(tcpTimer, delay, this, ref);
   }
   
@@ -162,17 +178,20 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  currentState = state;
   }
   
-  /*
-  private void sendSYNPacket() {
-	  TCPWrapper.send(new TCPPacket(localport, port, 0, 0, 
-				false, true, false, windowSize, null), address);
+  private void sendPacket(TCPPacket packet) {
+	  // If we force a resend before timer expires, need to reset timer.
+	  if (!(tcpTimer == null)) {
+		  tcpTimer.cancel();
+		  tcpTimer = null;
+	  }
+	  
+	  tcpTimer = new Timer(true);
+	  
+	  System.out.println("Sending packet with seqnumber " + packet.seqNum + " and starting timer...");
+	  TCPTimerTask timerTask = createTimerTask(timerDelay, packet);
+	  
+	  TCPWrapper.send(packet, this.address);
   }
-  
-  private void sendSYNACKPacket() {
-	  TCPWrapper.send(new TCPPacket(localport, port, 0, 0, 
-				true, true, false, windowSize, null), address);
-  }
-  */
   
   /**
    * handle timer expiration (called by TCPTimerTask)
@@ -180,9 +199,20 @@ class StudentSocketImpl extends BaseSocketImpl {
    * information.
    */
   public synchronized void handleTimer(Object ref){
-
     // this must run only once the last timer (30 second timer) has expired
     tcpTimer.cancel();
     tcpTimer = null;
+    
+    if (ref != null) {
+    	TCPPacket p = (TCPPacket) ref;
+    	System.out.println("Timer ran out on packet with seqnumber " + p.seqNum + ". Resending.");
+    	sendPacket(p);
+    }
+    else {
+    	if (currentState == State.TIME_WAIT) {
+    		System.out.println("30 second timer complete. Returning to CLOSED state.");
+    		stateChange(State.CLOSED);
+    	}
+    }
   }
 }

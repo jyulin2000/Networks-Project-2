@@ -9,7 +9,7 @@ public class TCPTimerTask extends TimerTask {
 
   /**
    * register timer event for TCP statck
-   * @param tcpTtimer TImer object to use
+   * @param tcpTtimer Timer object to use
    * @param delay length of time before timer in milliseconds
    * @param sock socket implementation to call sock.handleTimer(ref)
    * @param ref generic object of information to pass back
