@@ -191,12 +191,10 @@ class StudentSocketImpl extends BaseSocketImpl {
   
   private void sendPacket(TCPPacket packet) {
 	  // If we force a resend before timer expires, need to reset timer.
-	  /*
 	  if (!(tcpTimer == null)) {
 		  tcpTimer.cancel();
 		  tcpTimer = null;
 	  }
-	  */
 	  
 	  System.out.println("Sending packet with seqnumber " + packet.seqNum + " and starting timer...");
 	  TCPTimerTask timerTask = createTimerTask(timerDelay, packet);
