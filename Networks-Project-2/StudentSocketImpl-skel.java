@@ -401,7 +401,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  }
     
     if (ref != null) {
-    	System.out.println("hellohellohello")
+    	System.out.println("hellohellohello");
     	TCPPacket p = (TCPPacket) ref;
     	System.out.println("Resending packet with seqnumber " + p.seqNum + "...");
     	sendPacketWithTimer(p);
