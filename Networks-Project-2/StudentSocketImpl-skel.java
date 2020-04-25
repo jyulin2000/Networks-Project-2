@@ -185,8 +185,10 @@ class StudentSocketImpl extends BaseSocketImpl {
   private void stateChange(State state) {
 	  System.out.println("!!! " + currentState + "->" + state);
 	  currentState = state;
-	  tcpTimer.cancel();
-	  tcpTimer = null;
+	  if (!(tcpTimer == null)) {
+		  tcpTimer.cancel();
+		  tcpTimer = null;
+	  }
   }
   
   private void sendPacket(TCPPacket packet) {
