@@ -176,11 +176,15 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  			
 	  			// stateChange function will start the timer
 	  			stateChange(State.TIME_WAIT);
+	  		} else if (p.ackFlag) {
+	  			resendACKPacket();
 	  		}
 	  		break;
 	  	
 	  	case CLOSE_WAIT:
 	  		if (p.finFlag) {
+	  			resendACKPacket();
+	  		} else if (p.ackFlag) {
 	  			resendACKPacket();
 	  		}
 	  		break;
@@ -279,8 +283,6 @@ class StudentSocketImpl extends BaseSocketImpl {
 		  stateChange(State.LAST_ACK);
 	  } else if (currentState == State.ESTABLISHED) {
 		  stateChange(State.FIN_WAIT_1);
-	  } else {
-		  throw new IOException("Socket is not in a state that can be closed.");
 	  }
 	  
 	  sendPacketWithTimer(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber,
