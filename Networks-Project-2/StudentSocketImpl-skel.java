@@ -218,7 +218,8 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  			// stateChange function will start the timer
 	  			stateChange(State.TIME_WAIT);
 	  		} else if (p.finFlag) {
-	  			resendACKPacket();
+	  			sendPacketWithTimer(new TCPPacket(localport, port, seqNumberPlusOne, ackNumber, 
+	  					true, false, false, windowSize, null));
 	  		}
 	  		break;
 	  	
