@@ -185,6 +185,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  			// stateChange function will start the timer
 	  			stateChange(State.TIME_WAIT);
 	  		} else if (p.ackFlag) {
+	  			stateChange(State.TIME_WAIT);
 	  			resendACKPacket();
 	  		}
 	  		break;
