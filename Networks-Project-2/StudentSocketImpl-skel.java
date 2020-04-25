@@ -93,18 +93,25 @@ class StudentSocketImpl extends BaseSocketImpl {
 				}
 				
 				this.address = p.sourceAddr;
+				this.localport = p.destPort;
+				this.port = p.sourcePort;
+				
 				ackNumber = p.seqNum;
 				seqNumber++;
-				sendPacket(new TCPPacket(localport, p.sourcePort, seqNumber, ackNumber, 
+				sendPacket(new TCPPacket(localport, port, seqNumber, ackNumber, 
 						true, true, false, windowSize, null));
 				
 				stateChange(State.SYN_RCVD);
 	  		}
-	  	
+	  		break;
+	  		
 	  	case SYN_SENT:
+	  		System.out.println("SYN_SENT Case Block");
+	  		System.out.println("This socket current seqnumber: " + seqNumber + ", received packet acknumber: " + p.ackNum);
 	  		if (p.synFlag && p.ackFlag && p.ackNum == seqNumber) {
 	  			stateChange(State.ESTABLISHED);
 	  		}
+	  		break;
 	  }
 	  System.out.println(p.toString());
   }
