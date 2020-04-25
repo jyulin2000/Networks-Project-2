@@ -157,6 +157,12 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  D.registerListeningSocket(localport, this);
 	  
 	  stateChange(State.LISTEN);
+	  while (!(currentState == State.ESTABLISHED)) {
+	    	try {
+				wait();
+			} catch (Exception e) {
+			}
+	    }
   }
 
   
