@@ -262,8 +262,10 @@ class StudentSocketImpl extends BaseSocketImpl {
    */
   public synchronized void handleTimer(Object ref){
     // this must run only once the last timer (30 second timer) has expired
-    tcpTimer.cancel();
-    tcpTimer = null;
+	  if (!(tcpTimer == null)) {
+		  tcpTimer.cancel();
+		  tcpTimer = null;
+	  }
     
     if (ref != null) {
     	TCPPacket p = (TCPPacket) ref;
