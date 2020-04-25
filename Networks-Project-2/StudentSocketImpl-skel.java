@@ -18,7 +18,10 @@ class StudentSocketImpl extends BaseSocketImpl {
   
   // Timeout length for unACKed packets
   // milliseconds
-  private static final int timerDelay = 2500; 
+  private static final int timerDelay = 1000;
+  
+  // 30 second closing wait time
+  private static final int closeDelay = 30 * 1000;
   
   public enum State {
 	  CLOSED,
@@ -317,7 +320,7 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  }
 	  
 	  if (state == State.TIME_WAIT) {
-		  createTimerTask(30 * 1000, null);
+		  createTimerTask(closeDelay, null);
 	  }
   }
   
@@ -393,8 +396,13 @@ class StudentSocketImpl extends BaseSocketImpl {
     else {
     	if (currentState == State.TIME_WAIT) {
     		System.out.println("30 second timer complete. Returning to CLOSED state.");
-    		stateChange(State.CLOSED);
-    		notifyAll();
+    		try {
+	    		stateChange(State.CLOSED);
+	    		notifyAll();
+    		} catch (Exception e) {
+    		}
+    		
+    		this.notifyAll();
     		
     		try {
     			D.unregisterConnection(address, localport, port, this);
