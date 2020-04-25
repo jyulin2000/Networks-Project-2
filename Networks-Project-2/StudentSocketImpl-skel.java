@@ -185,8 +185,8 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  			// stateChange function will start the timer
 	  			stateChange(State.TIME_WAIT);
 	  		} else if (p.ackFlag) {
-	  			stateChange(State.TIME_WAIT);
 	  			resendACKPacket();
+	  			stateChange(State.TIME_WAIT);
 	  		}
 	  		break;
 	  	
@@ -342,7 +342,7 @@ class StudentSocketImpl extends BaseSocketImpl {
   
   private void sendPacket(TCPPacket packet) {
 	  // If we force a resend before timer expires, need to reset timer.
-	  if (!(tcpTimer == null)) {
+	  if (!(tcpTimer == null) && currentState != State.TIME_WAIT) {
 		  tcpTimer.cancel();
 		  tcpTimer = null;
 	  }
