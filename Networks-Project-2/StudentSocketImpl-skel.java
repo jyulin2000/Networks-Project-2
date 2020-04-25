@@ -133,8 +133,10 @@ class StudentSocketImpl extends BaseSocketImpl {
 	  	case ESTABLISHED:
 	  		if (p.finFlag) {
 	  			updateSeqNumber(p.seqNum);
+	  			/*
 	  			this.address = p.sourceAddr;
 	  			this.localport = p.sourcePort;
+	  			*/
 	  			
 	  			stateChange(State.CLOSE_WAIT);
 	  			
