@@ -12,7 +12,7 @@ public class client3 {
       TCPStart.start();
 
         // Hammer connections at the server and try to break it
-        for (int i=0; i<10; i++){
+        for (int i=0; i<3; i++){
           
           Socket sock = new Socket(argv[0], Integer.parseInt(argv[1]));
   

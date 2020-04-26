@@ -13,7 +13,7 @@ public class server3 {
       TCPStart.start();
 
         // Open ALL THE CONNECTIONS
-        for (int i=0; i<10; i++){
+        for (int i=0; i<3; i++){
 
           ServerSocket sock = new ServerSocket(Integer.parseInt(argv[0]));
           Socket connSock = sock.accept();
